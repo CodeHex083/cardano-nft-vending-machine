@@ -175,9 +175,9 @@ The file `tests/scale_test.py` contains mechanisms for testing the vending machi
 		--mint-price 5000000
 		--num-wallets 100
 
-Would run a simulation where 100 wallets would randomly attempt to purchase between 0 and 4 assets (according to a normal distribution), during a 5A mint.  The code would ensure that each recipient received less than or equal to their stated asset count and that in total no more than 100 assets were minted.
+Would run a simulation where 100 wallets would randomly attempt to purchase between 0 and 4 assets, during a 5A mint.  The code would ensure that each recipient received less than or equal to their stated asset count and that in total no more than 100 assets were minted.
 
-Note that currently we have only loaded 100 sample files into `tests/data/scale` but could increase this in the future as needed.  The key here is the concurrent wallet/UTxO creation, not necessarily the asset scale.  Whitelist scale testing is not supported at the moment.
+Note that currently we have only loaded 100 sample files into `tests/data/scale` but could increase this in the future as needed.  The key here is the concurrent wallet/UTxO creation, not necessarily the asset scale.
 
 ### Code Coverage
 We use [coverage](https://coverage.readthedocs.io/en/6.4.4/) to measure code coverage from our pytests across the code base.  To run a full test suite with code coverage metrics, invoke:
