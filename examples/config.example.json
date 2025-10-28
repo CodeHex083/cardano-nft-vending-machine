@@ -1,0 +1,43 @@
+{
+  "network": {
+    "mainnet": false,
+    "preview": false
+  },
+  "blockfrost": {
+    "project_id": "your-blockfrost-project-id"
+  },
+  "addresses": {
+    "payment_address": "addr1...",
+    "payment_signing_key": "/path/to/payment.skey",
+    "profit_address": "addr1...",
+    "dev_address": "addr1..."
+  },
+  "mint": {
+    "price_lovelace": 20000000,
+    "policy_id": "LOVELACE",
+    "script_path": "/path/to/policy.script",
+    "signing_key": "/path/to/mint.skey"
+  },
+  "directories": {
+    "metadata_directory": "/path/to/nft/metadata/",
+    "output_directory": "/path/to/output/",
+    "whitelist_directory": null
+  },
+  "vending": {
+    "single_vend_max": 5,
+    "vend_randomly": true
+  },
+  "fees": {
+    "dev_fee_lovelace": 1000000,
+    "enabled": true
+  },
+  "bogo": {
+    "enabled": true,
+    "threshold": 2,
+    "bonus": 1
+  },
+  "whitelist": {
+    "enabled": false,
+    "type": "single_use"
+  }
+}

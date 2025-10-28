@@ -74,6 +74,17 @@ There is a sample vending machine script that is included in the ``src/`` direct
                 [--dev-fee dev_fee --dev-addr dev_addr] \
                 [--bogo threshold additional] \
                 [--mainnet]
+## Examples
+Looking for real-world usage examples? Check out the [`examples/`](examples/) directory for sample integrations including:
+
+- **Quick Start** - Minimal setup to get started
+- **Single Mint** - Public mint without whitelist
+- **Whitelist Integration** - Asset-based and wallet-based whitelists
+- **Profit Split** - Developer fees and BOGO deals
+- **Full Integration** - Complete production setup
+
+We encourage contributions! Submit your own integrations via PRs to help others learn.
+
 ## Installation
 This package is available from [PyPI](https://pypi.org/) and can be installed using ``pip3``.  Python <3.8 is currently unsupported at this time.
 
