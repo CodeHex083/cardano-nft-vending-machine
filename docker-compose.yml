@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  vending_machine:
+    build: .
+    image: cardano-nft-vending-machine:latest
+    container_name: cardano-nft-vending-machine
+    restart: unless-stopped
+    environment:
+      # Core
+      PAYMENT_ADDR: ${PAYMENT_ADDR}
+      PAYMENT_SIGN_KEY_PATH: /secrets/payment.skey
+      PROFIT_ADDR: ${PROFIT_ADDR}
+      BLOCKFROST_PROJECT: ${BLOCKFROST_PROJECT}
+      SINGLE_VEND_MAX: ${SINGLE_VEND_MAX:-10}
+      # Pricing (choose either MINT_PRICES or MINT_PRICE/MINT_POLICY_ID)
+      MINT_PRICES: ${MINT_PRICES:-}
+      MINT_PRICE: ${MINT_PRICE:-}
+      MINT_POLICY_ID: ${MINT_POLICY_ID:-}
+      # Minting scripts and keys (comma-separated lists)
+      MINT_SCRIPT_PATHS: /policy/${MINT_SCRIPT_FILES}
+      MINT_SIGN_KEY_PATHS: /policy/${MINT_SIGN_KEY_FILES}
+      # Directories
+      METADATA_DIR: /data/metadata
+      OUTPUT_DIR: /data/output
+      # Optional flags
+      VEND_RANDOMLY: ${VEND_RANDOMLY:-false}
+      DEV_FEE: ${DEV_FEE:-}
+      DEV_ADDR: ${DEV_ADDR:-}
+      BOGO_THRESHOLD: ${BOGO_THRESHOLD:-}
+      BOGO_ADDITIONAL: ${BOGO_ADDITIONAL:-}
+      # Network
+      MAINNET: ${MAINNET:-false}
+      PREVIEW: ${PREVIEW:-false}
+      # Whitelist
+      WHITELIST_TYPE: ${WHITELIST_TYPE:-no}
+      WHITELIST_DIR: /whitelist
+      # Subcommand: run or validate
+      SUBCOMMAND: ${SUBCOMMAND:-run}
+    volumes:
+      # Sign keys (read-only)
+      - ./secrets/payment.skey:/secrets/payment.skey:ro
+      # Policy scripts and keys directory (read-only). Provide comma-separated names in MINT_SCRIPT_FILES and MINT_SIGN_KEY_FILES
+      - ./policy:/policy:ro
+      # Metadata input directory (read-only)
+      - ./metadata:/data/metadata:ro
+      # Output directory (read-write)
+      - ./output:/data/output:rw
+      # Optional whitelist directory (read-write so consumed files can be moved)
+      - ./whitelist:/whitelist:rw
+    command: []
+
+volumes:
+  # Named volumes can be defined here if you prefer persistent docker volumes over bind mounts
+  # output:
+  # metadata:
+  # policy:
+  # whitelist:
+
+

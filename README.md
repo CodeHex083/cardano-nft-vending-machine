@@ -216,3 +216,67 @@ We aim to maintain 85%+ coverage (lines + branches) if possible.
 Documentation is stored in multi-line comments inside the source code and should be generated using the ``pdoc3`` package as follows:
 
     pdoc3 --html -o docs/ src/cardano
+
+## Docker
+
+Run the vending machine in a consistent environment with Docker. The image bundles `cardano-cli` from the upstream Cardano node image and installs this library.
+
+### Build
+
+```bash
+docker build -t cardano-nft-vending-machine .
+```
+
+### docker-compose (recommended)
+
+1. Prepare directories in your project root:
+   - `secrets/` containing `payment.skey`
+   - `policy/` containing your mint policy scripts and signing keys
+   - `metadata/` containing 721 JSON metadata files
+   - `output/` for generated tx files and vending output
+   - `whitelist/` if using whitelist (will be modified during runs)
+
+2. Set environment (either export in your shell or use a `.env` file):
+
+```bash
+# Core
+export PAYMENT_ADDR=addr_test1... 
+export PROFIT_ADDR=addr_test1...
+export BLOCKFROST_PROJECT=your_blockfrost_project_id
+export SINGLE_VEND_MAX=10
+
+# Pricing (choose one approach)
+export MINT_PRICES="5000000 lovelace"                   # one or more; semicolon-separated pairs
+# or
+# export MINT_PRICE=5000000
+# export MINT_POLICY_ID=lovelace
+
+# Policy scripts and keys (comma-separated file names located under ./policy)
+export MINT_SCRIPT_FILES="policy.script"
+export MINT_SIGN_KEY_FILES="policy.skey"
+
+# Optional
+export VEND_RANDOMLY=false
+export MAINNET=false
+export PREVIEW=false
+export WHITELIST_TYPE=no   # no | single_use_asset | unlimited_asset | wallet
+# export DEV_FEE=0
+# export DEV_ADDR=addr_test1...
+# export BOGO_THRESHOLD=2
+# export BOGO_ADDITIONAL=1
+```
+
+3. Start:
+
+```bash
+docker compose up --build
+```
+
+This will mount:
+- `./secrets/payment.skey` to `/secrets/payment.skey` (read-only)
+- `./policy` to `/policy` (read-only)
+- `./metadata` to `/data/metadata` (read-only)
+- `./output` to `/data/output` (read-write)
+- `./whitelist` to `/whitelist` (read-write; optional)
+
+The container entrypoint translates the environment variables into the equivalent CLI flags for `main.py`. To validate configuration without running, set `SUBCOMMAND=validate`.
