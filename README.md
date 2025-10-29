@@ -19,12 +19,25 @@
   </p>
 </p>
 
-## :warning: **IMPORTANT**
+## :warning: **SECURITY & SAFETY**
+
 Interactions on the Cardano blockchain involve **REAL CURRENCY AND SHOULD NOT BE TREATED LIGHTLY**.  Some principles:
 * Never send money to an address you don't know and can't validate
 * Keys should be stored on servers that have as little attack surface (e.g., [iptables blacklists](https://www.cyberciti.biz/tips/linux-iptables-4-block-all-incoming-traffic-but-allow-ssh.html)) as possible
 * Open source software should always be audited independently -- UTSL!
 * There are **NO WARRANTIES WHATSOEVER WITH THIS PACKAGE** -- use at your own risk
+
+### 🔒 **CRITICAL**: Read [SECURITY.md](SECURITY.md) Before Deployment
+
+Before running this software with real ADA, you **MUST** read the comprehensive security guidelines in [SECURITY.md](SECURITY.md), including:
+
+- Key management and storage
+- Server hardening and IP whitelisting
+- Network security and firewall configuration
+- Operational best practices
+- Monitoring and incident response
+
+**Failure to follow security best practices can result in permanent financial loss.**
 ## Quickstart
 This project contains Library bindings that can be installed using the standard [wheel](https://pypi.org/project/wheel/) mechanism.  See the [script quickstart section](#cardano_vending_machinepy) for how to run from CLI.
 ### Library Usage
@@ -74,6 +87,17 @@ There is a sample vending machine script that is included in the ``src/`` direct
                 [--dev-fee dev_fee --dev-addr dev_addr] \
                 [--bogo threshold additional] \
                 [--mainnet]
+## Examples
+Looking for real-world usage examples? Check out the [`examples/`](examples/) directory for sample integrations including:
+
+- **Quick Start** - Minimal setup to get started
+- **Single Mint** - Public mint without whitelist
+- **Whitelist Integration** - Asset-based and wallet-based whitelists
+- **Profit Split** - Developer fees and BOGO deals
+- **Full Integration** - Complete production setup
+
+We encourage contributions! Submit your own integrations via PRs to help others learn.
+
 ## Installation
 This package is available from [PyPI](https://pypi.org/) and can be installed using ``pip3``.  Python <3.8 is currently unsupported at this time.
 

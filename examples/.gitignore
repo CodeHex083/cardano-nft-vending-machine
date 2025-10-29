@@ -1,0 +1,21 @@
+# Exclude sensitive information
+config.json
+*.skey
+*.vkey
+*.addr
+
+# Exclude output directories
+output/
+metadata/
+whitelist/
+
+# Exclude temporary files
+*.log
+*.tmp
+__pycache__/
+*.pyc
+*.pyo
+
+# Exclude keys
+*.key
+keys/
