@@ -51,6 +51,7 @@ The library consists of several Python objects representing the mint process.  T
     mint = Mint([price], 1000000, 'addr1_developer', '/path/to/nft/json/metadata', '/path/to/mint/script', '/path/to/mint.skey', whitelist)
 
     # Blockfrost is used in the code to validate where the UTXO sent to the payment address came from
+    # See docs/BLOCKFROST.md for detailed documentation on Blockfrost integration
     blockfrost_api = BlockfrostApi('<BLOCKFROST_PROJ_ID>', mainnet=True)
 
     # CardanoCli is a wrapper around the cardano-cli command (used as a utility without any interaction with the network)
@@ -164,6 +165,8 @@ Tests are stored in the ``tests`` subdirectory and are run using [pytest](https:
 There are two supported test Cardano networks on Blockfrost as of the time of this writing: preprod and preview.  More information on these two supported test networks can be found on the [Cardano.org testnet documentation](https://docs.cardano.org/cardano-testnet/getting-started).
 
 For running the testing suite on preprod you will need to create a file at ``tests/secrets/blockfrost-preprod.key`` that contains *just your blockfrost key* for preprod. If you want to run on preview, simply do that same for your preview key at ``tests/secrets/blockfrost-preview.key``.  For more information, see the [full blockfrost.io documentation](https://docs.blockfrost.io/).
+
+**For detailed information on Blockfrost integration, API endpoints, rate limiting, and setup, see [docs/BLOCKFROST.md](docs/BLOCKFROST.md).**
 
 ### Funder Key Files
 The test suite assumes that there is a "funder" address that is able to pay tADA out (and then receive the entire sum at the end of a successful test less chain fees).  To create a new funder address, run:
