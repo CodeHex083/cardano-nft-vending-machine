@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 import math
 import os
 import random
@@ -94,10 +95,11 @@ class NftVendingMachine(object):
         return f"{policy[0:Mint._POLICY_LEN]}.{policy[Mint._POLICY_LEN:]}"
 
     def __get_pricing_breakdown(self, input_addr, num_mints, nft_policy_map, mint_req, fee):
+        logger = logging.getLogger(__name__)
         payees = {input_addr: {}, self.profit_addr: {}, self.mint.dev_addr: {}}
 
         # GET A COPY OF THE UTXOs TO TRACK THE PAYOUTS (PUT LOVELACE BEFORE NATIVE ASSETS)
-        print(f"Building pricing breakdown for {num_mints} NFTs being paid from {mint_req}")
+        logger.info(f"Building pricing breakdown for {num_mints} NFTs being paid from {mint_req}")
         remaining = copy.deepcopy(mint_req.balances)
         remaining.sort(key=lambda balance: balance.policy)
         remaining.reverse()
@@ -117,7 +119,7 @@ class NftVendingMachine(object):
             else:
                 num_paid_for = min(remaining_to_payout, math.floor(remainder.lovelace / matching_price[0].lovelace))
             total_paid = (num_paid_for * matching_price[0].lovelace)
-            print(f"Paid for {num_paid_for} NFTs using {total_paid} {unit}")
+            logger.debug(f"Paid for {num_paid_for} NFTs using {total_paid} {unit}")
             if not num_paid_for:
                 continue
             remaining_to_payout -= num_paid_for
@@ -152,7 +154,7 @@ class NftVendingMachine(object):
         all_names = [name for name_lst in nft_policy_map.values() for name in name_lst]
         total_name_chars = sum([len(name) for name in all_names])
         user_rebate = Mint.RebateCalculator.calculate_rebate_for(len(nft_policy_map.keys()), len(all_names), total_name_chars)
-        print(f"Minimum rebate to user is {user_rebate}")
+        logger.info(f"Minimum rebate to user is {user_rebate} lovelace")
 
         # DEDUCT REBATES AND FEES FROM PROFIT IF ADA-ONLY MINT, OTHERWISE FROM USER
         payees[input_addr][Balance.LOVELACE_POLICY] = user_rebate
@@ -168,14 +170,14 @@ class NftVendingMachine(object):
             expected_dev_fee = num_mints * self.mint.dev_fee
             if len(payees[self.profit_addr]) == 1:
                 actual_dev_fee = min([expected_dev_fee, profit_ada])
-                print(f"Paying developer {actual_dev_fee} lovelace")
+                logger.info(f"Paying developer {actual_dev_fee} lovelace")
                 dev_fee_diff = expected_dev_fee - actual_dev_fee
                 if dev_fee_diff:
-                    print(f"SOMETHING IS OFF: Expected dev fee ({expected_dev_fee}) greater than actual ({actual_dev_fee}) by {dev_fee_diff} lovelace")
+                    logger.warning(f"Expected dev fee ({expected_dev_fee}) greater than actual ({actual_dev_fee}) by {dev_fee_diff} lovelace")
                 payees[self.mint.dev_addr][Balance.LOVELACE_POLICY] = actual_dev_fee
                 payees[self.profit_addr][Balance.LOVELACE_POLICY] -= actual_dev_fee
             else:
-                print(f"NATIVE TOKEN WARNING: Cannot pay dev fee for native token, need to credit {expected_dev_fee} lovelace ({num_mints} mints)")
+                logger.warning(f"Cannot pay dev fee for native token, need to credit {expected_dev_fee} lovelace ({num_mints} mints)")
 
         # DRAIN THE REMAINDER TO THE USER
         for remainder in remaining:
@@ -189,9 +191,10 @@ class NftVendingMachine(object):
         return payees
 
     def __do_vend(self, mint_req, output_dir, locked_subdir, metadata_subdir):
+        logger = logging.getLogger(__name__)
         available_mints = sorted(os.listdir(self.mint.nfts_dir))
         if not available_mints:
-            print("WARNING: Metadata directory is empty, please restock the vending machine...")
+            logger.warning("Metadata directory is empty, please restock the vending machine...")
         elif self.vend_randomly:
             random.shuffle(available_mints)
 
@@ -213,18 +216,18 @@ class NftVendingMachine(object):
         if self.mint.bogo:
             eligible_bonuses = self.mint.bogo.determine_bonuses(num_mints_requested)
             num_mints_plus_bonus = min(self.single_vend_max, len(available_mints), (num_mints + eligible_bonuses))
-            print(f"Bonus of {eligible_bonuses} NFTs determined based on {num_mints_requested} (can mint {num_mints_plus_bonus} in total)")
+            logger.info(f"Bonus of {eligible_bonuses} NFTs determined based on {num_mints_requested} (can mint {num_mints_plus_bonus} in total)")
             bonuses = num_mints_plus_bonus - num_mints
             num_mints += bonuses
 
-        print(f"Beginning to mint {num_mints} NFTs to send to address {input_addr}")
+        logger.info(f"Beginning to mint {num_mints} NFTs to send to address {input_addr}")
         txn_id = int(time.time())
         nft_metadata_file = self.__lock_and_merge(available_mints, num_mints, output_dir, locked_subdir, metadata_subdir, txn_id)
         nft_policy_map = self.__get_policy_name_map(nft_metadata_file)
 
         fee = 0
         pricing_breakdown = self.__get_pricing_breakdown(input_addr, (num_mints - bonuses), nft_policy_map, mint_req, fee)
-        print(f"Anticipated pricing breakdown: {pricing_breakdown}")
+        logger.debug(f"Anticipated pricing breakdown: {pricing_breakdown}")
 
         tx_ins = [f"--tx-in {mint_req.hash}#{mint_req.ix}"]
         tx_outs = self.__get_tx_out_args(pricing_breakdown)
@@ -238,7 +241,7 @@ class NftVendingMachine(object):
         fee = self.cardano_cli.calculate_min_fee(mint_build_tmp, tx_in_count, tx_out_count, len(signers))
 
         pricing_breakdown = self.__get_pricing_breakdown(input_addr, (num_mints - bonuses), nft_policy_map, mint_req, fee)
-        print(f"Final pricing breakdown: {pricing_breakdown}")
+        logger.info(f"Final pricing breakdown: {pricing_breakdown}")
 
         tx_outs = self.__get_tx_out_args(pricing_breakdown)
         mint_build = self.cardano_cli.build_raw_mint_txn(output_dir, txn_id, tx_ins, tx_outs, fee, nft_metadata_file, self.mint, nft_policy_map, self.script_map)
@@ -255,11 +258,13 @@ class NftVendingMachine(object):
             try:
                 self.__do_vend(mint_req, output_dir, locked_subdir, metadata_subdir)
             except BadUtxoError as e:
-                print(f"UNRECOVERABLE UTXO ERROR\n{e.utxo}\n^--- REQUIRES INVESTIGATION")
-                print(traceback.format_exc())
+                logger = logging.getLogger(__name__)
+                logger.error(f"UNRECOVERABLE UTXO ERROR\n{e.utxo}\n^--- REQUIRES INVESTIGATION")
+                logger.error(traceback.format_exc())
             except Exception as e:
-                print(f"ERROR: Uncaught exception for {mint_req}, added to exclusions (RETRY WILL NOT BE ATTEMPTED)")
-                print(traceback.format_exc())
+                logger = logging.getLogger(__name__)
+                logger.error(f"Uncaught exception for {mint_req}, added to exclusions (RETRY WILL NOT BE ATTEMPTED): {e}")
+                logger.error(traceback.format_exc())
                 time.sleep(NftVendingMachine.__ERROR_WAIT)
 
     def validate(self):
