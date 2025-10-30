@@ -2,9 +2,11 @@
 
 import argparse
 import json
+import logging
 import os
 import random
 import signal
+import sys
 import time
 
 from cardano.wt.bonuses.bogo import Bogo
@@ -80,8 +82,9 @@ def generate_cardano_cli_protocol(translator, blockfrost_input):
     return translated
 
 def rewritten_protocol_params(blockfrost_protocol_json, output_dir):
+    logger = logging.getLogger(__name__)
     cardanocli_protocol_json = generate_cardano_cli_protocol(BLOCKFROST_PROTOCOL_TRANSLATOR, blockfrost_protocol_json)
-    print(cardanocli_protocol_json)
+    logger.debug(f"Protocol parameters: {json.dumps(cardanocli_protocol_json, indent=2)}")
     protocol_filename = os.path.join(output_dir, 'protocol.json')
     with open(protocol_filename, 'w') as protocol_file:
         json.dump(cardanocli_protocol_json, protocol_file)
@@ -117,6 +120,8 @@ def get_parser():
     parser.add_argument('--dev-fee', type=int, required=False, help='Developer fee (in lovelace, 1/1,000,000 ₳)')
     parser.add_argument('--dev-addr', type=str, required=False, help='Address of developer wallet to send fee to')
     parser.add_argument('--bogo', type=int, nargs=2, metavar=('BOGO_THRESHOLD', 'BOGO_ADDITIONAL'), help='Provide BOGO functionality (two arguments are the threshold for a bonus and then how many bonuses the user should get)')
+    parser.add_argument('--log-level', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help='Set the logging level (default: INFO)')
+    parser.add_argument('--log-file', type=str, default=None, help='Path to log file. If not specified, logs are written to stdout only.')
 
     whitelist = parser.add_mutually_exclusive_group(required=True)
     whitelist.add_argument('--no-whitelist', action='store_true', help='No whitelist required for mints')
@@ -130,8 +135,50 @@ def get_parser():
     subcommands.add_parser('validate', help='Only validate the vending machine with the specified configuration, do NOT run', parents=[parser])
     return cli_parser
 
+def setup_logging(log_level, log_file=None):
+    """
+    Configure logging with timestamps and severity levels.
+    
+    :param log_level: String level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    :param log_file: Optional path to log file. If None, logs only go to stdout.
+    """
+    numeric_level = getattr(logging, log_level.upper(), logging.INFO)
+    
+    # Create formatter with timestamp and severity
+    formatter = logging.Formatter(
+        fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(numeric_level)
+    
+    # Remove existing handlers
+    root_logger.handlers = []
+    
+    # Console handler (stdout) - always add
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(numeric_level)
+    console_handler.setFormatter(formatter)
+    root_logger.addHandler(console_handler)
+    
+    # File handler - optional
+    if log_file:
+        file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
+        file_handler.setLevel(numeric_level)
+        file_handler.setFormatter(formatter)
+        root_logger.addHandler(file_handler)
+        root_logger.info(f"Logging to file: {log_file}")
+    
+    return root_logger
+
 if __name__ == "__main__":
     _args = get_parser().parse_args()
+
+    # Set up logging first
+    logger = setup_logging(_args.log_level, _args.log_file)
+    logger.info("Starting vending machine")
 
     set_interrupt_signal(end_program)
     seed_random()
@@ -148,7 +195,7 @@ if __name__ == "__main__":
     _blockfrost_protocol_params = _blockfrost_api.get_protocol_parameters()
     _protocol_params = rewritten_protocol_params(_blockfrost_protocol_params, _args.output_dir)
     max_txn_fee = (_blockfrost_protocol_params['min_fee_a'] * _blockfrost_protocol_params['max_tx_size']) + _blockfrost_protocol_params['min_fee_b']
-    print(f"Max txn fee is a * size(tx) + b: {max_txn_fee}");
+    logger.info(f"Max txn fee is a * size(tx) + b: {max_txn_fee}")
     _cardano_cli = CardanoCli(protocol_params=_protocol_params)
 
     _nft_vending_machine = NftVendingMachine(
@@ -163,11 +210,11 @@ if __name__ == "__main__":
             mainnet=_args.mainnet
     )
     _nft_vending_machine.validate()
-    print(f"Initialized vending machine with the following parameters")
-    print(_nft_vending_machine.as_json())
+    logger.info(f"Initialized vending machine with the following parameters")
+    logger.debug(_nft_vending_machine.as_json())
 
     if _args.command == 'validate':
-        print('Successfully validated vending machine configuration!')
+        logger.info('Successfully validated vending machine configuration!')
     elif _args.command == 'run':
         exclusions = set()
         while _program_is_running:

@@ -1,4 +1,5 @@
 import json
+import logging
 import math
 import os
 
@@ -75,10 +76,11 @@ class Mint(object):
             if price.policy in validated_price_policies:
                 raise ValueError(f"Duplicate price detected for policy '{price.policy}', aborting")
             validated_price_policies.append(price.policy)
+        logger = logging.getLogger(__name__)
         validated_names = []
         for filename in os.listdir(self.nfts_dir):
             with open(os.path.join(self.nfts_dir, filename), 'r') as file:
-                print(f"Validating '{filename}'")
+                logger.debug(f"Validating '{filename}'")
                 validated_nfts = self.__validated_nft(json.load(file), validated_names, filename)
                 validated_names.extend(validated_nfts)
         self.validated_names = validated_names
@@ -89,7 +91,7 @@ class Mint(object):
             if not os.path.exists(sign_key):
                 raise ValueError(f"Signing key file '{sign_key}' not found on filesystem")
         self.policies = list(set([nft_name.split('.')[0] for nft_name in self.validated_names]))
-        print(f"Validating whitelist of type {self.whitelist.__class__}")
+        logger.info(f"Validating whitelist of type {self.whitelist.__class__}")
         self.whitelist.validate()
 
     def __validate_str_lengths(self, metadata):

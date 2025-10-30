@@ -1,4 +1,5 @@
 import json
+import logging
 import sys
 
 from pycardano.cip import cip8
@@ -42,21 +43,22 @@ class WalletWhitelist(FilesystemBasedWhitelist):
         ]
 
     def _get_signed_message(self, wl_resources):
+        logger = logging.getLogger(__name__)
         messages = self.__get_messages(wl_resources)
         if len(messages) != 1:
-            print(f"Wallet whitelist requires exactly 1 MSG (674) label metadata, found {wl_resources}")
+            logger.warning(f"Wallet whitelist requires exactly 1 MSG (674) label metadata, found {wl_resources}")
             return None
         if not WalletWhitelist._SIGNATURE_KEY in messages[0]:
-            print(f"Expected to find '{WalletWhitelist._SIGNATURE_KEY}' in message metadata, found {messages[0]}")
+            logger.warning(f"Expected to find '{WalletWhitelist._SIGNATURE_KEY}' in message metadata, found {messages[0]}")
             return None
         signature_msg = messages[0][WalletWhitelist._SIGNATURE_KEY]
         if not type(signature_msg) is list:
-            print(f"Encountered unexpected type '{type(signature_msg)}': {messages[0]}")
+            logger.warning(f"Encountered unexpected type '{type(signature_msg)}': {messages[0]}")
             return None
         try:
             return json.loads(''.join(signature_msg))
         except Exception as e:
-            print(f"Could not parse stringified JSON '{signature_msg}': {e}")
+            logger.warning(f"Could not parse stringified JSON '{signature_msg}': {e}")
             return None
 
     def available(self, wl_resources):
@@ -70,6 +72,7 @@ class WalletWhitelist(FilesystemBasedWhitelist):
         :param wl_resources: The transaction's metadata (used for signatures)
         :return: Slots remaining if a wallet is on the whitelist, 0 otherwise
         """
+        logger = logging.getLogger(__name__)
         message = self._get_signed_message(wl_resources['metadata'])
         if not message:
             return 0
@@ -82,11 +85,11 @@ class WalletWhitelist(FilesystemBasedWhitelist):
                 raise ValueError(f"{stake_key} not on whitelist")
             for input_addr in wl_resources['input_addrs']:
                 if not input_addr in addresses:
-                    print(f"Found unexpected address {input_addr}, excluding stake key from whitelist")
+                    logger.warning(f"Found unexpected address {input_addr}, excluding stake key from whitelist")
                     return 0
             return num_whitelisted
         except Exception as e:
-            print(f"Failed to verify {message}: {e}")
+            logger.warning(f"Failed to verify {message}: {e}")
             return 0
 
 
