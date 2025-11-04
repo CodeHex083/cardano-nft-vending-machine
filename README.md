@@ -26,18 +26,6 @@ Interactions on the Cardano blockchain involve **REAL CURRENCY AND SHOULD NOT BE
 * Keys should be stored on servers that have as little attack surface (e.g., [iptables blacklists](https://www.cyberciti.biz/tips/linux-iptables-4-block-all-incoming-traffic-but-allow-ssh.html)) as possible
 * Open source software should always be audited independently -- UTSL!
 * There are **NO WARRANTIES WHATSOEVER WITH THIS PACKAGE** -- use at your own risk
-
-### 🔒 **CRITICAL**: Read [SECURITY.md](SECURITY.md) Before Deployment
-
-Before running this software with real ADA, you **MUST** read the comprehensive security guidelines in [SECURITY.md](SECURITY.md), including:
-
-- Key management and storage
-- Server hardening and IP whitelisting
-- Network security and firewall configuration
-- Operational best practices
-- Monitoring and incident response
-
-**Failure to follow security best practices can result in permanent financial loss.**
 ## Quickstart
 This project contains Library bindings that can be installed using the standard [wheel](https://pypi.org/project/wheel/) mechanism.  See the [script quickstart section](#cardano_vending_machinepy) for how to run from CLI.
 ### Library Usage
