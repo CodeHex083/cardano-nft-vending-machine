@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import subprocess
 import tempfile
@@ -19,12 +20,15 @@ class CardanoCli(object):
         self.protocol_params = protocol_params
 
     def __run_script(self, cardano_args):
+        logger = logging.getLogger(__name__)
         cmd = f'cardano-cli {cardano_args}'
-        print(cmd)
-        cli_cmd = subprocess.Popen(cmd,  shell=True, text=True, stdout=subprocess.PIPE)
+        logger.debug(f"Executing command: {cmd}")
+        cli_cmd = subprocess.Popen(cmd,  shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (out, err) = cli_cmd.communicate()
-        print(f'[STDOUT] {out}')
-        print(f'[STDERR] {err}')
+        if out:
+            logger.debug(f'[STDOUT] {out}')
+        if err:
+            logger.debug(f'[STDERR] {err}')
         return out
 
     def __named_assets_str(nft_policy_map):

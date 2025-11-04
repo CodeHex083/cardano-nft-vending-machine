@@ -1,4 +1,5 @@
 import json
+import logging
 import requests
 import time
 
@@ -34,19 +35,23 @@ class BlockfrostApi(object):
         return f"https://cardano-{identifier}.blockfrost.io/api/v0"
 
     def __call_with_retries(self, call_func, max_retries):
+        logger = logging.getLogger(__name__)
         retries = 0
         while True:
             try:
                 api_resp = call_func()
-                print(f"{api_resp.url}: ({api_resp.status_code})")
-                print(api_resp.text)
+                logger.debug(f"Blockfrost API call: {api_resp.url} (Status: {api_resp.status_code})")
+                logger.debug(f"Response: {api_resp.text}")
                 api_resp.raise_for_status()
                 return api_resp.json()
             except requests.exceptions.HTTPError as e:
                 if retries < max_retries:
                     retries += 1
-                    time.sleep(retries * BlockfrostApi._BACKOFF_SEC)
+                    wait_time = retries * BlockfrostApi._BACKOFF_SEC
+                    logger.warning(f"Blockfrost API error (retry {retries}/{max_retries}): {e}. Waiting {wait_time}s before retry.")
+                    time.sleep(wait_time)
                 else:
+                    logger.error(f"Blockfrost API error: Max retries ({max_retries}) exceeded for {call_func}")
                     raise e
 
     def __call_get_api(self, resource):
@@ -112,14 +117,15 @@ class BlockfrostApi(object):
         return self.__call_get_api(f"txs/{txn_hash}/metadata")
 
     def get_utxos(self, address, exclusions):
+        logger = logging.getLogger(__name__)
         available_utxos = list()
         for utxo_data in self.__call_paginated_get_api(f"addresses/{address}/utxos"):
-            #print('EXCLUSIONS\t', [f'{utxo.hash}#{utxo.ix}' for utxo in exclusions])
+            logger.debug(f'Exclusions list: {[f"{utxo.hash}#{utxo.ix}" for utxo in exclusions]}')
             for raw_utxo in utxo_data:
                 balances = [Balance(int(balance['quantity']), balance['unit']) for balance in raw_utxo['amount']]
                 utxo = Utxo(raw_utxo['tx_hash'], raw_utxo['output_index'], balances)
                 if utxo in exclusions or utxo in available_utxos:
-                    print(f'Skipping {utxo.hash}#{utxo.ix}')
+                    logger.debug(f'Skipping {utxo.hash}#{utxo.ix} (already processed or excluded)')
                     continue
                 available_utxos.append(utxo)
         return available_utxos
