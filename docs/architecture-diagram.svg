@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" style="background-color: white;">
+  <!-- Title -->
+  <text x="600" y="30" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#333">NFT Vending Machine Architecture</text>
+  
+  <!-- Phase 1: Payment -->
+  <g id="payment-phase">
+    <rect x="50" y="80" width="250" height="140" rx="10" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="175" y="110" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#1976d2">1. Payment</text>
+    <text x="60" y="135" font-family="Arial, sans-serif" font-size="12" fill="#333">User sends UTXO to</text>
+    <text x="60" y="155" font-family="Arial, sans-serif" font-size="12" fill="#333">payment_addr</text>
+    <text x="60" y="175" font-family="Arial, sans-serif" font-size="12" fill="#333">• ADA (lovelace)</text>
+    <text x="60" y="195" font-family="Arial, sans-serif" font-size="12" fill="#333">• Native tokens</text>
+  </g>
+  
+  <!-- Arrow 1 -->
+  <path d="M 300 150 L 350 150" stroke="#1976d2" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Phase 2: Validation -->
+  <g id="validation-phase">
+    <rect x="350" y="80" width="250" height="200" rx="10" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/>
+    <text x="475" y="110" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#f57c00">2. Validation</text>
+    <text x="360" y="135" font-family="Arial, sans-serif" font-size="12" fill="#333">• Fetch UTXOs via</text>
+    <text x="360" y="155" font-family="Arial, sans-serif" font-size="12" fill="#333">  Blockfrost API</text>
+    <text x="360" y="175" font-family="Arial, sans-serif" font-size="12" fill="#333">• Calculate num_mints</text>
+    <text x="360" y="195" font-family="Arial, sans-serif" font-size="12" fill="#333">• Check whitelist</text>
+    <text x="360" y="215" font-family="Arial, sans-serif" font-size="12" fill="#333">• Apply BOGO bonuses</text>
+    <text x="360" y="235" font-family="Arial, sans-serif" font-size="12" fill="#333">• Validate payment</text>
+    <text x="360" y="255" font-family="Arial, sans-serif" font-size="12" fill="#333">• Extract user address</text>
+  </g>
+  
+  <!-- Arrow 2 -->
+  <path d="M 600 180 L 650 180" stroke="#f57c00" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Phase 3: Mint -->
+  <g id="mint-phase">
+    <rect x="650" y="80" width="250" height="200" rx="10" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2"/>
+    <text x="775" y="110" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#7b1fa2">3. Mint</text>
+    <text x="660" y="135" font-family="Arial, sans-serif" font-size="12" fill="#333">• Lock &amp; merge metadata</text>
+    <text x="660" y="155" font-family="Arial, sans-serif" font-size="12" fill="#333">• Calculate pricing:</text>
+    <text x="670" y="175" font-family="Arial, sans-serif" font-size="11" fill="#333">  - Profit, Rebates</text>
+    <text x="670" y="195" font-family="Arial, sans-serif" font-size="11" fill="#333">  - Dev fees, Change</text>
+    <text x="660" y="215" font-family="Arial, sans-serif" font-size="12" fill="#333">• Build transaction</text>
+    <text x="660" y="235" font-family="Arial, sans-serif" font-size="12" fill="#333">• Calculate &amp; add fees</text>
+    <text x="660" y="255" font-family="Arial, sans-serif" font-size="12" fill="#333">• Sign transaction</text>
+  </g>
+  
+  <!-- Arrow 3 -->
+  <path d="M 900 180 L 950 180" stroke="#7b1fa2" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Phase 4: Distribution -->
+  <g id="distribution-phase">
+    <rect x="950" y="80" width="200" height="200" rx="10" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
+    <text x="1050" y="110" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#388e3c">4. Distribution</text>
+    <text x="960" y="135" font-family="Arial, sans-serif" font-size="12" fill="#333">• Submit to blockchain</text>
+    <text x="960" y="155" font-family="Arial, sans-serif" font-size="12" fill="#333">• Consume whitelist</text>
+    <text x="960" y="175" font-family="Arial, sans-serif" font-size="12" fill="#333">• NFTs → User</text>
+    <text x="960" y="195" font-family="Arial, sans-serif" font-size="12" fill="#333">• Change → User</text>
+    <text x="960" y="215" font-family="Arial, sans-serif" font-size="12" fill="#333">• Profit → Profit Addr</text>
+    <text x="960" y="235" font-family="Arial, sans-serif" font-size="12" fill="#333">• Dev Fee → Dev Addr</text>
+  </g>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- Components section -->
+  <rect x="50" y="320" width="1100" height="420" rx="10" fill="#fafafa" stroke="#ccc" stroke-width="2" stroke-dasharray="5,5"/>
+  <text x="600" y="350" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">Key Components</text>
+  
+  <!-- NftVendingMachine -->
+  <rect x="70" y="370" width="200" height="120" rx="5" fill="#e3f2fd" stroke="#1976d2" stroke-width="1"/>
+  <text x="170" y="395" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#1976d2">NftVendingMachine</text>
+  <text x="80" y="420" font-family="Arial, sans-serif" font-size="11" fill="#333">• Main orchestrator</text>
+  <text x="80" y="440" font-family="Arial, sans-serif" font-size="11" fill="#333">• Manages vending cycle</text>
+  <text x="80" y="460" font-family="Arial, sans-serif" font-size="11" fill="#333">• Validates configuration</text>
+  <text x="80" y="480" font-family="Arial, sans-serif" font-size="11" fill="#333">• Handles errors</text>
+  
+  <!-- Mint -->
+  <rect x="290" y="370" width="200" height="120" rx="5" fill="#fff3e0" stroke="#f57c00" stroke-width="1"/>
+  <text x="390" y="395" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#f57c00">Mint</text>
+  <text x="300" y="420" font-family="Arial, sans-serif" font-size="11" fill="#333">• Collection config</text>
+  <text x="300" y="440" font-family="Arial, sans-serif" font-size="11" fill="#333">• Pricing &amp; policies</text>
+  <text x="300" y="460" font-family="Arial, sans-serif" font-size="11" fill="#333">• Metadata management</text>
+  <text x="300" y="480" font-family="Arial, sans-serif" font-size="11" fill="#333">• Rebate calculations</text>
+  
+  <!-- Whitelist -->
+  <rect x="510" y="370" width="200" height="120" rx="5" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1"/>
+  <text x="610" y="395" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#7b1fa2">Whitelist</text>
+  <text x="520" y="420" font-family="Arial, sans-serif" font-size="11" fill="#333">• Access control</text>
+  <text x="520" y="440" font-family="Arial, sans-serif" font-size="11" fill="#333">• NoWhitelist</text>
+  <text x="520" y="460" font-family="Arial, sans-serif" font-size="11" fill="#333">• AssetWhitelist</text>
+  <text x="520" y="480" font-family="Arial, sans-serif" font-size="11" fill="#333">• WalletWhitelist</text>
+  
+  <!-- BlockfrostApi -->
+  <rect x="730" y="370" width="200" height="120" rx="5" fill="#e8f5e9" stroke="#388e3c" stroke-width="1"/>
+  <text x="830" y="395" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#388e3c">BlockfrostApi</text>
+  <text x="740" y="420" font-family="Arial, sans-serif" font-size="11" fill="#333">• Blockchain interface</text>
+  <text x="740" y="440" font-family="Arial, sans-serif" font-size="11" fill="#333">• Fetch UTXOs</text>
+  <text x="740" y="460" font-family="Arial, sans-serif" font-size="11" fill="#333">• Transaction details</text>
+  <text x="740" y="480" font-family="Arial, sans-serif" font-size="11" fill="#333">• Submit transactions</text>
+  
+  <!-- CardanoCli -->
+  <rect x="950" y="370" width="180" height="120" rx="5" fill="#fff9c4" stroke="#f9a825" stroke-width="1"/>
+  <text x="1040" y="395" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#f9a825">CardanoCli</text>
+  <text x="960" y="420" font-family="Arial, sans-serif" font-size="11" fill="#333">• CLI wrapper</text>
+  <text x="960" y="440" font-family="Arial, sans-serif" font-size="11" fill="#333">• Build transactions</text>
+  <text x="960" y="460" font-family="Arial, sans-serif" font-size="11" fill="#333">• Calculate fees</text>
+  <text x="960" y="480" font-family="Arial, sans-serif" font-size="11" fill="#333">• Sign transactions</text>
+  
+  <!-- Continuous Loop -->
+  <path d="M 1150 180 Q 1200 180 1200 320 Q 1200 460 1150 460 Q 1100 460 1050 460" stroke="#666" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <path d="M 1050 460 Q 1000 460 950 460 Q 900 460 850 460" stroke="#666" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <path d="M 850 460 Q 800 460 750 460 Q 700 460 650 460" stroke="#666" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <path d="M 650 460 Q 600 460 550 460 Q 500 460 450 460" stroke="#666" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <path d="M 450 460 Q 400 460 350 460 Q 300 460 250 460" stroke="#666" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <path d="M 250 460 Q 200 460 150 460 Q 100 460 50 460" stroke="#666" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <path d="M 50 460 Q 0 460 0 320 Q 0 180 50 180" stroke="#666" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <text x="600" y="520" font-family="Arial, sans-serif" font-size="12" font-style="italic" text-anchor="middle" fill="#666">Continuous Loop: Monitor payment address every 15 seconds</text>
+  
+  <!-- Error Handling -->
+  <rect x="50" y="550" width="1100" height="120" rx="5" fill="#ffebee" stroke="#c62828" stroke-width="1"/>
+  <text x="600" y="575" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#c62828">Error Handling</text>
+  <text x="70" y="600" font-family="Arial, sans-serif" font-size="12" fill="#333">• BadUtxoError: Unrecoverable errors (invalid payment, insufficient funds) → Add to exclusions, log for investigation</text>
+  <text x="70" y="620" font-family="Arial, sans-serif" font-size="12" fill="#333">• General Exceptions: Recoverable errors (network issues) → Retry on next cycle (wait 30s)</text>
+  <text x="70" y="640" font-family="Arial, sans-serif" font-size="12" fill="#333">• Metadata locking prevents concurrent access and double-minting</text>
+  <text x="70" y="660" font-family="Arial, sans-serif" font-size="12" fill="#333">• Exclusion set tracks processed UTXOs to prevent double-spending</text>
+</svg>
+

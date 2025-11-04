@@ -25,6 +25,24 @@ Interactions on the Cardano blockchain involve **REAL CURRENCY AND SHOULD NOT BE
 * Keys should be stored on servers that have as little attack surface (e.g., [iptables blacklists](https://www.cyberciti.biz/tips/linux-iptables-4-block-all-incoming-traffic-but-allow-ssh.html)) as possible
 * Open source software should always be audited independently -- UTSL!
 * There are **NO WARRANTIES WHATSOEVER WITH THIS PACKAGE** -- use at your own risk
+
+## Architecture
+
+The NFT Vending Machine follows a four-phase flow: **Payment → Validation → Mint → Distribution**.
+
+### Visual Flow
+
+![Architecture Diagram](docs/architecture-diagram.svg)
+
+### Process Overview
+
+1. **Payment**: Users send payment (UTXO) to the payment address on Cardano blockchain
+2. **Validation**: System validates payment, calculates mint count, checks whitelist, and applies bonuses
+3. **Mint**: System locks metadata, calculates pricing breakdown, builds and signs the transaction
+4. **Distribution**: Transaction is submitted to blockchain, NFTs are distributed, and whitelist is consumed
+
+For detailed documentation on the complete flow, components, and error handling, see [Architecture Documentation](docs/architecture.md).
+
 ## Quickstart
 This project contains Library bindings that can be installed using the standard [wheel](https://pypi.org/project/wheel/) mechanism.  See the [script quickstart section](#cardano_vending_machinepy) for how to run from CLI.
 ### Library Usage
